@@ -68,7 +68,7 @@ export const popularVotes = {
         url: 'PancakeSwap',
         name: 'PancakeSwap',
         introduction:
-          'Multichain on BNB Chain, Ethereum, Aptos, Polygon zkEVM, zkSync Era,  Arbitrum, Linea, Base, and opBNB\n',
+          'Multichain on BNB Chain, Ethereum, Aptos, Polygon zkEVM, zkSync Era,  Arbitrum, Linea, Base, and Solana\n',
         identity: 100,
         extra: {
           website: 'https://pancakeswap.finance ',

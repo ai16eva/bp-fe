@@ -12,7 +12,7 @@ export const AboutUs = () => {
         </Typography>
         <Typography className="text-center max-w-[700px]">
           “Welcome to BOOM PLAY, the ultimate decentralized Web3 prediction
-          challenge platform powered by BNB! At BOOM PLAY, we are transforming
+          challenge platform powered by Solana! At BOOM PLAY, we are transforming
           the collective intelligence prediction experience by integrating
           real-time
           {' '}
