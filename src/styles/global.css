@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --background-neutral: #ffffff;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: #000000;
+    --input: #d8d8d8;
+    --ring: #0000ff;
+    --color-custom-blue-500: #149FFF;
+  }
+
+  .dark {
+    --background: #030617;
+    --foreground: #ffffff;
+    --background-neutral: #030617;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: #333333;
+    --input: #2a2a2a;
+    --ring: #4d4dff;
+  }
+}
+
+@layer base {
+  html {
+    @apply w-full;
+  }
+
+  body {
+    @apply w-full antialiased bg-background-neutral text-foreground min-h-screen font-satoshi;
+  }
+
+  img {
+    max-width: 100%;
+    vertical-align: middle;
+  }
+
+  .app-container {
+    @apply mx-auto w-full lg:max-w-1120 xl:max-w-screen-lg 2xl:max-w-1600 px-4 lg:px-0;
+  }
+
+  .market-card-wrapper {
+    position: relative;
+    border-radius: 16px;
+    background: #006FBC;
+  }
+
+  .market-card-wrapper .market-card {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    transition: transform 0.25s ease;
+  }
+
+  .dark .market-card-wrapper .market-card {
+    background: #0B1016;
+  }
+
+  .market-card-wrapper:hover .market-card,
+  .market-card-wrapper:active .market-card {
+    transform: rotate(-4deg) translate(-10px, -10px);
+  }
+}
