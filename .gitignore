@@ -21,7 +21,7 @@ storybook-static
 /playwright/.cache/
 
 # next.js
-# /.next
+/.next
 /out
 
 # cache
