@@ -1,5 +1,5 @@
 import { BN } from '@coral-xyz/anchor';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { Transaction } from '@solana/web3.js';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { appQueryKeys } from '@/config/query';
@@ -19,7 +19,7 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { publicKey, sendTransaction } = usePrivyWallet();
-  const { voteAnswer, updateVoterCheckpoint } = useGovernanceOperations();
+  const { voteAnswer } = useGovernanceOperations();
   const { nfts, refetch } = useNFTBalance();
 
   const txService = useMemo(() => new SolanaTransactionService(connection), []);
@@ -59,6 +59,8 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
       const questKeyBN = new BN(quest_key);
       const answerKeyBN = new BN(answerKey);
 
+      // DISABLED due to On-chain Error: "AccountDidNotSerialize" (3004).
+      /*
       const nftTokenAccounts = currentNfts.map(
         (nft) => new PublicKey(nft.tokenAccount)
       );
@@ -68,6 +70,8 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
       if (checkpointTx) {
         combinedTx.add(...checkpointTx.instructions);
       }
+      */
+      const combinedTx = new Transaction();
 
       const voteTx = await voteAnswer(questKeyBN, answerKeyBN);
       if (!voteTx) {
@@ -138,7 +142,7 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
 
       if (errorMsgLower.includes('insufficient voting power')) {
         errorMessage =
-          'Insufficient voting power. Please ensure you have NFTs.';
+          'Please ensure you have delegated your Governance NFTs before this quest was created.';
       } else if (errorMsgLower.includes('already voted')) {
         errorMessage = 'You have already voted for this quest.';
       } else if (errorMsgLower.includes('not allowed')) {

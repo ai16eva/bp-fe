@@ -1,4 +1,5 @@
-import type {
+import {
+  ComputeBudgetProgram,
   Connection,
   PublicKey,
   Transaction,
@@ -6,7 +7,7 @@ import type {
 } from '@solana/web3.js';
 
 export class SolanaTransactionService {
-  constructor(private connection: Connection) {}
+  constructor(private connection: Connection) { }
 
   async sendAndConfirmTransaction(
     transaction: Transaction,
@@ -17,7 +18,9 @@ export class SolanaTransactionService {
       = await this.connection.getLatestBlockhash('confirmed');
 
     transaction.recentBlockhash = blockhash;
+    transaction.recentBlockhash = blockhash;
     transaction.feePayer = feePayer;
+    this.addComputeBudget(transaction);
 
     const signedTx = await signTransaction(transaction);
 
@@ -52,8 +55,27 @@ export class SolanaTransactionService {
     const { blockhash } = await this.connection.getLatestBlockhash('confirmed');
 
     transaction.recentBlockhash = blockhash;
+    transaction.recentBlockhash = blockhash;
     transaction.feePayer = feePayer;
+    this.addComputeBudget(transaction);
 
     return transaction;
+  }
+  private addComputeBudget(transaction: Transaction) {
+    const hasComputeLimit = transaction.instructions.some(ix =>
+      ix.programId.equals(ComputeBudgetProgram.programId) && ix.data[0] === 2
+    );
+
+    if (!hasComputeLimit) {
+      transaction.add(ComputeBudgetProgram.setComputeUnitLimit({ units: 1000000 }));
+    }
+
+    const hasPriorityFee = transaction.instructions.some(ix =>
+      ix.programId.equals(ComputeBudgetProgram.programId) && ix.data[0] === 3
+    );
+
+    if (!hasPriorityFee) {
+      transaction.add(ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 10000 }));
+    }
   }
 }

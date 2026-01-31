@@ -13,7 +13,7 @@ export const now = () => dayjs.tz(dayjs(), APP_TIMEZONE);
 
 export const parseToKST = (date?: string | Date | dayjs.Dayjs) => {
     if (!date) return now();
-    return dayjs.tz(date, APP_TIMEZONE);
+    return dayjs(date).tz(APP_TIMEZONE);
 };
 
 export const formatKST = (

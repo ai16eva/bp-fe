@@ -1,5 +1,5 @@
 import { BN } from '@coral-xyz/anchor';
-import { PublicKey, Transaction } from '@solana/web3.js';
+import { Transaction } from '@solana/web3.js';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { appQueryKeys } from '@/config/query';
 import { connection } from '@/config/solana';
@@ -18,7 +18,7 @@ export function useVoteDraft(quest: DAOQuestDraft, maxVote: number) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { publicKey, sendTransaction } = usePrivyWallet();
-  const { voteQuest, updateVoterCheckpoint } = useGovernanceOperations();
+  const { voteQuest } = useGovernanceOperations();
   const { nfts, refetch } = useNFTBalance();
 
   const txService = new SolanaTransactionService(connection);
@@ -65,16 +65,18 @@ export function useVoteDraft(quest: DAOQuestDraft, maxVote: number) {
       const questKeyBN = new BN(quest_key);
       const voteChoice = type === 'approve' ? 'approve' : 'reject';
 
+      // DISABLED due to On-chain Error: "AccountDidNotSerialize" (3004).
+      /*
       const nftTokenAccounts = currentNfts.map(
         (nft) => new PublicKey(nft.tokenAccount)
       );
-
-      const combinedTx = new Transaction();
-
+      
       const checkpointTx = await updateVoterCheckpoint(nftTokenAccounts);
       if (checkpointTx) {
         combinedTx.add(...checkpointTx.instructions);
       }
+            */
+      const combinedTx = new Transaction();
 
       const voteTx = await voteQuest(questKeyBN, voteChoice);
       if (!voteTx) {
@@ -146,7 +148,7 @@ export function useVoteDraft(quest: DAOQuestDraft, maxVote: number) {
 
       if (errorMsgLower.includes('insufficient voting power')) {
         errorMessage =
-          'Insufficient voting power. Please ensure you have NFTs.';
+          'Please ensure you have delegated your Governance NFTs before this quest was created.';
       } else if (errorMsgLower.includes('already voted')) {
         errorMessage = 'You have already voted for this quest.';
       } else if (errorMsgLower.includes('maximum number of votes')) {

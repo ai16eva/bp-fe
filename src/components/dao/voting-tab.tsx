@@ -20,8 +20,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useVoteAnswer } from '@/hooks/use-vote-answer';
 import { useVoteDraft } from '@/hooks/use-vote-draft';
 import { useVoteSuccess } from '@/hooks/use-vote-success';
-import { useClaimReward } from '@/hooks/use-claim-reward';
-import { useTreasuryBalance } from '@/hooks/use-treasury-balance';
+// import { useClaimReward } from '@/hooks/use-claim-reward';
+// import { useTreasuryBalance } from '@/hooks/use-treasury-balance';
 import type {
   DAOQuestAnswer,
   DAOQuestDraft,
@@ -299,7 +299,8 @@ const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
   };
 
   if (isEnded) {
-    return <ClaimActions quest={quest} />;
+    // return <ClaimActions quest={quest} />;
+    return null;
   }
 
   return (
@@ -338,55 +339,56 @@ const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
   );
 };
 
-const ClaimActions = ({ quest }: { quest: DAOQuestAnswer }) => {
-  const { data: configDetails, reward } = useGetGovernanceConfig();
-  const { data: treasuryBalance } = useTreasuryBalance();
-  const { mutate: claimReward, isPending: isClaiming } = useClaimReward(
-    String(quest.quest_key)
-  );
+// const ClaimActions = ({ quest }: { quest: DAOQuestAnswer }) => {
+//   const { data: configDetails, reward } = useGetGovernanceConfig();
+//   const { data: treasuryBalance } = useTreasuryBalance();
+//   const { mutate: claimReward, isPending: isClaiming } = useClaimReward(
+//     String(quest.quest_key)
+//   );
 
-  const rewardBN = configDetails?.rawConfig?.constantRewardToken;
+//   const rewardBN = configDetails?.rawConfig?.constantRewardToken;
 
-  // Check if treasury has enough balance for the reward (using BN comparison)
-  const canClaim = treasuryBalance && rewardBN
-    ? treasuryBalance.gte(rewardBN)
-    : false;
+//   // Check if treasury has enough balance for the reward (using BN comparison)
+//   const canClaim = treasuryBalance && rewardBN
+//     ? treasuryBalance.gte(rewardBN)
+//     : false;
 
-  if (!canClaim) {
-    return (
-      <div className="flex items-center justify-center p-4 rounded-xl bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">
-        <Typography>Reward pool is currently empty.</Typography>
-      </div>
-    );
-    // Alternatively, return null to completely hide it as requested:
-    // return null;
-  }
+//   if (!canClaim) {
+//     return (
+//       <div className="flex items-center justify-center p-4 rounded-xl bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400">
+//         <Typography>Reward pool is currently empty.</Typography>
+//       </div>
+//     );
+//     // Alternatively, return null to completely hide it as requested:
+//     // return null;
+//   }
 
-  return (
-    <div className="flex items-center gap-4">
-      <Button
-        onClick={() => claimReward()}
-        loading={isClaiming}
-        className="flex-1 h-12 px-6 py-3.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] border-none text-white"
-      >
-        Claim Reward ({reward} BOOM)
-      </Button>
-    </div>
-  );
-};
+//   return (
+//     <div className="flex items-center gap-4">
+//       <Button
+//         onClick={() => claimReward()}
+//         loading={isClaiming}
+//         className="flex-1 h-12 px-6 py-3.5 rounded-xl bg-[#00C853] hover:bg-[#00E676] border-none text-white"
+//       >
+//         Claim Reward ({reward} BOOM)
+//       </Button>
+//     </div>
+//   );
+// };
 
 const formatTimeLeft = (diff: number): string => {
   if (diff <= 0) {
     return '';
   }
 
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hrs = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const mins = Math.floor((diff / (1000 * 60)) % 60);
   const secs = Math.floor((diff / 1000) % 60);
 
-  return `${hrs.toString().padStart(2, '0')}:${mins
+  const timeString = `${hrs.toString().padStart(2, '0')}:${mins
     .toString()
-    .padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}s will be close this vote.`;
+    .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+  return `${days > 0 ? `${days}d ` : ''}${timeString}s will be close this vote.`;
 };

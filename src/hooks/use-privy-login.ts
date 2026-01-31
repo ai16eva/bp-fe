@@ -45,6 +45,8 @@ export const usePrivyLogin = () => {
               if (
                 createError?.statusCode !== 409
                 && createError?.status !== 409
+                && createError?.statusCode !== 400
+                && createError?.status !== 400
                 && !createError?.message?.includes('Wallet address duplicate')
               ) {
                 handleError(createError);
@@ -67,14 +69,14 @@ export const usePrivyLogin = () => {
     // Ignore user cancellation errors (user closed modal or rejected)
     const isUserCancellation
       = !errorMessage
-        || errorMessage.includes('exited_auth_flow')
-        || errorMessage.includes('user rejected')
-        || errorMessage.includes('user closed')
-        || errorMessage.includes('modal closed')
-        || errorMessage.includes('user denied')
-        || errorMessage.includes('cancelled')
-        || errorMessage.includes('canceled')
-        || errorMessage.includes('wallet address duplicate');
+      || errorMessage.includes('exited_auth_flow')
+      || errorMessage.includes('user rejected')
+      || errorMessage.includes('user closed')
+      || errorMessage.includes('modal closed')
+      || errorMessage.includes('user denied')
+      || errorMessage.includes('cancelled')
+      || errorMessage.includes('canceled')
+      || errorMessage.includes('wallet address duplicate');
 
     if (isUserCancellation) {
       return;

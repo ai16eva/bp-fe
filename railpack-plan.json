@@ -1,0 +1,16 @@
+{
+    "packages": {
+        "node": "22.22.0"
+    },
+    "steps": {
+        "install": {
+            "command": "npm install -g pnpm && pnpm install"
+        },
+        "build": {
+            "command": "pnpm build"
+        }
+    },
+    "deploy": {
+        "command": "node .next/standalone/server.js"
+    }
+}

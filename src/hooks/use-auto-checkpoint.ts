@@ -1,6 +1,6 @@
 'use client';
 
-import { PublicKey } from '@solana/web3.js';
+// import { PublicKey } from '@solana/web3.js';
 import { useEffect, useRef, useState } from 'react';
 
 import { connection } from '@/config/solana';
@@ -51,7 +51,7 @@ export function useAutoCheckpoint() {
 
     const nftsChanged
       = currentNftCount !== lastNftCountRef.current
-        || JSON.stringify(currentNftMints) !== JSON.stringify(lastNftMintsRef.current);
+      || JSON.stringify(currentNftMints) !== JSON.stringify(lastNftMintsRef.current);
 
     // Only checkpoint if:
     // 1. Haven't checked yet in this session, OR
@@ -80,6 +80,7 @@ export function useAutoCheckpoint() {
       setCheckpointStatus(prev => ({ ...prev, isUpdating: true, error: null }));
 
       try {
+        /*
         const nftAccounts = nfts.map(nft => new PublicKey(nft.tokenAccount));
         const checkpointTx = await updateVoterCheckpoint(nftAccounts);
 
@@ -123,6 +124,8 @@ export function useAutoCheckpoint() {
             console.warn('[auto-checkpoint] Transaction confirmation timeout, but might have succeeded:', signature);
           }
         }
+        console.info('[auto-checkpoint] Checkpoint updated successfully:', signature);
+        */
 
         setCheckpointStatus({
           lastUpdate: Date.now(),
@@ -130,8 +133,6 @@ export function useAutoCheckpoint() {
           error: null,
         });
         hasCheckedRef.current = true;
-
-        console.info('[auto-checkpoint] Checkpoint updated successfully:', signature);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.warn('[auto-checkpoint] Failed to update checkpoint:', errorMessage);

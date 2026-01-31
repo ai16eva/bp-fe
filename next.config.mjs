@@ -17,17 +17,17 @@ const sentryEnabled = Boolean(process.env.SENTRY_AUTH_TOKEN);
 const withOptionalSentry = config =>
   sentryEnabled
     ? withSentryConfig(config, {
-        // FIXME: Add your Sentry organization and project names
-        org: 'nextjs-boilerplate-org',
-        project: 'nextjs-boilerplate',
-        silent: !process.env.CI,
-        widenClientFileUpload: true,
-        tunnelRoute: '/monitoring',
-        hideSourceMaps: true,
-        disableLogger: true,
-        automaticVercelMonitors: true,
-        telemetry: false,
-      })
+      // FIXME: Add your Sentry organization and project names
+      org: 'nextjs-boilerplate-org',
+      project: 'nextjs-boilerplate',
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      tunnelRoute: '/monitoring',
+      hideSourceMaps: true,
+      disableLogger: true,
+      automaticVercelMonitors: true,
+      telemetry: false,
+    })
     : config;
 
 /** @type {import('next').NextConfig} */
@@ -38,6 +38,7 @@ export default withOptionalSentry(
     },
     poweredByHeader: false,
     reactStrictMode: true,
+    output: 'standalone',
     experimental: {
       serverComponentsExternalPackages: ['@electric-sql/pglite'],
     },

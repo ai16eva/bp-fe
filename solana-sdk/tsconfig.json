@@ -2,7 +2,9 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "lib": [
+      "ES2020"
+    ],
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
@@ -16,9 +18,20 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@bp-market/types": ["../target/types/bp_market"]
+      "@bp-market/types": [
+        "../target/types/bp_market"
+      ]
     }
   },
-  "include": ["src/**/*", "../target/types/**/*", "scripts"],
-  "exclude": ["node_modules", "dist", "examples", "tests"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples",
+    "tests",
+    "scripts",
+    "../target"
+  ]
 }
