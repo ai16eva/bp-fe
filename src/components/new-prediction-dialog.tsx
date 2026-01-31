@@ -54,6 +54,7 @@ import {
   uploadYouTubeThumbnail,
 } from '@/utils/sns';
 import { DateTimePicker } from '@/components/ui/calendar';
+import { Env } from '@/libs/Env';
 
 type NewPredictionDialogProps = {
   open?: boolean;
@@ -71,28 +72,32 @@ const imageSource = [
   },
 ];
 
-const BETTING_TOKENS = [
+/**
+ * Betting tokens configuration
+ * Uses environment variables to ensure correct token addresses for mainnet/devnet
+ */
+const getBettingTokens = () => [
   {
-    value: 'GVi8Ce9QdL18QrD4WBjJznxtaoQefxJT5bNqUodTcZ7R',
+    value: Env.NEXT_PUBLIC_BOOM_TOKEN_ADDRESS,
     label: 'BoomPlay Token (BOOM)',
     symbol: 'BOOM',
   },
   {
-    value: 'So11111111111111111111111111111111111111112',
+    value: Env.NEXT_PUBLIC_WSOL_TOKEN_ADDRESS || 'So11111111111111111111111111111111111111112',
     label: 'Wrapped SOL (WSOL)',
     symbol: 'WSOL',
   },
   {
-    value: '6HXWa6EXRakLTfBrNM9B5rM9YS8qLNtkZb5cabYzvFNs',
+    value: Env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS,
     label: 'USDT',
     symbol: 'USDT',
   },
   {
-    value: 'JECeXdTJSjsr7tabVe4CSsHvNN8RLuBmVst6aZ335rC7',
+    value: Env.NEXT_PUBLIC_USDC_TOKEN_ADDRESS || 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
     label: 'USDC',
     symbol: 'USDC',
   },
-] as const;
+];
 
 const BaseSchema = z.object({
   title: z
@@ -160,7 +165,7 @@ export default function NewPredictionDialog({
       title: '',
       description: '',
       imageType: 'image',
-      bettingToken: BETTING_TOKENS[0].value,
+      bettingToken: getBettingTokens()[0]?.value ?? Env.NEXT_PUBLIC_BOOM_TOKEN_ADDRESS,
       answers: ['Option 1', 'Option 2'],
     },
   });
@@ -370,7 +375,7 @@ export default function NewPredictionDialog({
         throw new Error('Wallet not connected');
       }
 
-      const selectedToken = BETTING_TOKENS.find(
+      const selectedToken = getBettingTokens().find(
         (t) => t.value === data.bettingToken
       );
 
@@ -470,7 +475,7 @@ export default function NewPredictionDialog({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {BETTING_TOKENS.map((token) => (
+                          {getBettingTokens().map((token) => (
                             <SelectItem key={token.value} value={token.value}>
                               {token.symbol}
                             </SelectItem>
