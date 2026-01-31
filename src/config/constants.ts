@@ -1,4 +1,4 @@
-import { Env } from '@/libs/Env';
+// import { Env } from '@/libs/Env';
 
 // filter options
 export const filterDAOQuestsOptions = [
@@ -21,18 +21,15 @@ export const tokenList = [
     name: 'USDT',
     iconUrl: '/assets/icons/usdt-icon.png',
   },
-];
-
-if (Env.NEXT_PUBLIC_NETWORK === 'testnet') {
-  tokenList.push({
+  {
     key: 'USDC',
     name: 'USDC',
     iconUrl:
       'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png',
   },
-    {
-      key: 'WSOL',
-      name: 'WSOL',
-      iconUrl: '/assets/icons/wrapersol.webp',
-    });
-}
+  {
+    key: 'WSOL',
+    name: 'WSOL',
+    iconUrl: '/assets/icons/wrapersol.webp',
+  },
+];
