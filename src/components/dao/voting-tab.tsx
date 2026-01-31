@@ -40,7 +40,7 @@ type VotingTabProps =
 export const VotingTab = ({ quest, status }: VotingTabProps) => {
   const { maxVote } = useGetGovernanceConfig();
 
-  const { posVote, negVote, totalVote, endAt } = extractDAOQuest(
+  const { posVote, negVote, totalVote, endAt, isEnded } = extractDAOQuest(
     quest,
     status,
     maxVote
@@ -57,7 +57,7 @@ export const VotingTab = ({ quest, status }: VotingTabProps) => {
     : negVote / totalVote;
 
   if (status === 'answer') {
-    view = <AnswerActions quest={quest} />;
+    view = <AnswerActions quest={quest} isEnded={isEnded} />;
   } else {
     view = (
       <div className="flex flex-col gap-6">
@@ -123,8 +123,8 @@ export const VotingTab = ({ quest, status }: VotingTabProps) => {
             />
           </div>
         </div>
-        {status === 'draft' && <DraftActions quest={quest} maxVote={maxVote} />}
-        {status === 'success' && <SuccessActions quest={quest} />}
+        {status === 'draft' && <DraftActions quest={quest} maxVote={maxVote} isEnded={isEnded} />}
+        {status === 'success' && <SuccessActions quest={quest} isEnded={isEnded} />}
       </div>
     );
   }
@@ -161,9 +161,11 @@ const TimeLeft = ({ endAt }: { endAt: string }) => {
 const DraftActions = ({
   quest,
   maxVote,
+  isEnded
 }: {
   quest: DAOQuestDraft;
   maxVote: number;
+  isEnded: boolean;
 }) => {
   const { dao_draft_end_at } = quest;
   const { toast } = useToast();
@@ -174,8 +176,6 @@ const DraftActions = ({
     quest,
     maxVote
   );
-
-  const isEnded = parseToKST(dao_draft_end_at).isBefore(now());
 
   const handleAction = (type: VoteDraftOption) => {
     if (!publicKey) {
@@ -216,15 +216,19 @@ const DraftActions = ({
   );
 };
 
-const SuccessActions = ({ quest }: { quest: DAOQuestSuccess }) => {
+const SuccessActions = ({
+  quest,
+  isEnded,
+}: {
+  quest: DAOQuestSuccess;
+  isEnded: boolean;
+}) => {
   const { dao_success_end_at } = quest;
   const { toast } = useToast();
   const { publicKey } = usePrivyWallet();
   const [voteType, setVoteType] = useState<VoteSuccessOption | null>(null);
 
   const { mutate: voteSuccess, isPending: isVoting } = useVoteSuccess(quest);
-
-  const isEnded = parseToKST(dao_success_end_at).isBefore(now());
 
   const handleAction = (type: VoteSuccessOption) => {
     if (!publicKey) {
@@ -265,7 +269,13 @@ const SuccessActions = ({ quest }: { quest: DAOQuestSuccess }) => {
   );
 };
 
-const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
+const AnswerActions = ({
+  quest,
+  isEnded
+}: {
+  quest: DAOQuestAnswer;
+  isEnded: boolean;
+}) => {
   const { dao_answer_end_at } = quest;
   const { toast } = useToast();
   const { publicKey } = usePrivyWallet();
@@ -274,7 +284,10 @@ const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
   const { mutate: voteAnswerMutation, isPending: isVoting } =
     useVoteAnswer(quest);
 
-  const isEnded = parseToKST(dao_answer_end_at).isBefore(now());
+  const totalAnswerVotes = quest.answers.reduce(
+    (acc, curr) => acc + (curr.total_answer_vote_power || 0),
+    0
+  );
 
   const handleAction = () => {
     if (!publicKey) {
@@ -298,6 +311,53 @@ const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
     });
   };
 
+  const AnswerResults = () => (
+    <div className="flex flex-col gap-4 mb-6">
+      {[...quest.answers]
+        .sort((a, b) =>
+          String(a.answer_key).localeCompare(String(b.answer_key))
+        )
+        .map((ans) => {
+          const votePower = ans.total_answer_vote_power || 0;
+          const percentage =
+            totalAnswerVotes > 0 ? votePower / totalAnswerVotes : 0;
+
+          return (
+            <div key={ans.answer_key}>
+              <div className="mb-1 flex items-center justify-between">
+                <Typography
+                  level="body2"
+                  className="font-medium text-foreground-70"
+                >
+                  {ans.answer_title}
+                </Typography>
+                <div className="flex items-center gap-1">
+                  <Typography
+                    level="body2"
+                    className="font-medium text-foreground-70"
+                  >
+                    {votePower}
+                  </Typography>
+                  <Badge>
+                    {formatNumber(percentage * 100, {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 2,
+                    })}
+                    %
+                  </Badge>
+                </div>
+              </div>
+              <Progress
+                value={percentage * 100}
+                variant="success" // Using success variant for positive indication
+                className="h-1.5 bg-[#006FBC1F] rounded-[20px] [&>div]:bg-[#006FBC] [&>div]:rounded-[20px]"
+              />
+            </div>
+          );
+        })}
+    </div>
+  );
+
   if (isEnded) {
     // return <ClaimActions quest={quest} />;
     return null;
@@ -305,6 +365,8 @@ const AnswerActions = ({ quest }: { quest: DAOQuestAnswer }) => {
 
   return (
     <div className="flex flex-col gap-4">
+      <AnswerResults />
+
       <div className="space-y-2">
         <Select value={answer} onValueChange={setAnswer}>
           <SelectTrigger>
