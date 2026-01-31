@@ -167,7 +167,6 @@ const DraftActions = ({
   maxVote: number;
   isEnded: boolean;
 }) => {
-  const { dao_draft_end_at } = quest;
   const { toast } = useToast();
   const { publicKey } = usePrivyWallet();
   const [voteType, setVoteType] = useState<VoteDraftOption | null>(null);
@@ -223,7 +222,6 @@ const SuccessActions = ({
   quest: DAOQuestSuccess;
   isEnded: boolean;
 }) => {
-  const { dao_success_end_at } = quest;
   const { toast } = useToast();
   const { publicKey } = usePrivyWallet();
   const [voteType, setVoteType] = useState<VoteSuccessOption | null>(null);
@@ -276,7 +274,6 @@ const AnswerActions = ({
   quest: DAOQuestAnswer;
   isEnded: boolean;
 }) => {
-  const { dao_answer_end_at } = quest;
   const { toast } = useToast();
   const { publicKey } = usePrivyWallet();
   const [answer, setAnswer] = useState('');
