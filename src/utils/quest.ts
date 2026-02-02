@@ -27,11 +27,7 @@ export const extractDAOQuest = (
     answer: (quest as DAOQuestAnswer).dao_answer_end_at,
   };
 
-  let endAt = endAtMapping[status];
-
-  if (endAt && startAt && dayjs(endAt).diff(dayjs(startAt), 'minute') < 5) {
-    endAt = dayjs(startAt).add(24, 'hour').toISOString();
-  }
+  const endAt = endAtMapping[status];
 
   const voteCountsMapping = {
     draft: {

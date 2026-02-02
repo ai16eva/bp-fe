@@ -198,11 +198,16 @@ export const TableActions = ({
 
     const hasEnoughVote = quest && quest.total_vote >= 5;
 
+
+
+    const isRejected = !!quest && quest.total_reject_power > quest.total_approve_power;
+
     const canSetDraftEnd
       = !!quest
       && quest.quest_status === 'DRAFT'
       && isDraftEnded
-      && hasEnoughVote;
+      && hasEnoughVote
+      && !isRejected;
 
     const canPublish = isDraftEnded && quest.quest_status === 'APPROVE';
 

@@ -201,12 +201,12 @@ export default function NewPredictionDialog({
       try {
         await setupCreatorNFTAndGovernanceItem(quest.data);
         const startQuest = now();
-        const endQuest = now().add(Math.min(questDuration, 24), 'hour');
+        const endQuest = now().add(questDuration, 'hour');
 
         draftQuest({
           quest_key: quest.data.quest_key!,
-          start_at: formatKST(startQuest, 'YYYY-MM-DD HH:mm:ss'),
-          end_at: formatKST(endQuest, 'YYYY-MM-DD HH:mm:ss'),
+          start_at: startQuest.toISOString(),
+          end_at: endQuest.toISOString(),
         });
       } catch (e: any) {
         toast({
