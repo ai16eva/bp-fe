@@ -1,7 +1,7 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { now, formatKST } from '@/utils/timezone';
+import { now } from '@/utils/timezone';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import type { PropsWithChildren } from 'react';
