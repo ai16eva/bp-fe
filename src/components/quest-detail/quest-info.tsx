@@ -17,7 +17,7 @@ export const QuestInfo = ({ quest }: { quest?: QuestDetail }) => {
   const status =
     (!!quest?.quest_finish_datetime &&
       dayjs(quest.quest_finish_datetime).isBefore(dayjs())) ||
-    (!!quest?.quest_end_date && dayjs(quest.quest_end_date).isBefore(dayjs()))
+      (!!quest?.quest_end_date && dayjs(quest.quest_end_date).isBefore(dayjs()))
       ? 'ended'
       : 'in-progress';
 
@@ -79,7 +79,7 @@ export const QuestInfo = ({ quest }: { quest?: QuestDetail }) => {
             level="body1"
             className="text-sm font-normal leading-[100%] text-right text-foreground font-[Poppins]"
           >
-            {dayjs(quest?.quest_end_date ?? '').format('YYYY/MM/DD - hh:mm:ss')}
+            {dayjs(quest?.quest_end_date ?? '').format('YYYY/MM/DD - hh:mm:ss A')}
           </Typography>
         </div>
       )}
