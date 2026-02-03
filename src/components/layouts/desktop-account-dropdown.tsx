@@ -18,7 +18,7 @@ interface DesktopAccountDropdownProps {
 }
 
 export const DesktopAccountDropdown = ({ address }: DesktopAccountDropdownProps) => {
-  const { user, setAddress, isLoggingOutRef } = useAuth();
+  const { user, isLoggingOutRef } = useAuth();
   const { logout } = usePrivyWallet();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -63,9 +63,7 @@ export const DesktopAccountDropdown = ({ address }: DesktopAccountDropdownProps)
       isLoggingOutRef.current = true;
     }
     try {
-      setAddress(null);
       if (typeof window !== 'undefined') {
-        window.localStorage.removeItem('bpl-selected-wallet');
         window.sessionStorage.removeItem(storageKey.signedMessage);
         window.sessionStorage.removeItem('__creating_signature__');
       }

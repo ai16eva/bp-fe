@@ -23,7 +23,7 @@ import { WalletAddressPopover } from './wallet-address-popover';
 export function Account() {
   const { authenticated: _authenticated } = usePrivy();
   const { publicKey: _publicKey, connected: _connected, logout } = usePrivyWallet();
-  const { user, address: sessionAddress, setAddress, isLoggingOutRef } = useAuth();
+  const { user, address: sessionAddress, isLoggingOutRef } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const sm = useMediaQuery('(min-width: 640px)');
@@ -82,9 +82,7 @@ export function Account() {
             isLoggingOutRef.current = true;
           }
           try {
-            setAddress(null);
             if (typeof window !== 'undefined') {
-              window.localStorage.removeItem('bpl-selected-wallet');
               window.sessionStorage.removeItem(storageKey.signedMessage);
               window.sessionStorage.removeItem('__creating_signature__');
             }

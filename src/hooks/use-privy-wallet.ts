@@ -13,13 +13,10 @@ import {
   signMessageWithPrivy,
 } from '@/utils/privy-utils';
 
-/**
- * Custom hook that wraps Privy hooks to provide an interface similar to useWallet()
- * This makes migration from wallet-adapter easier
- */
+
 export function usePrivyWallet() {
-  const { authenticated, ready, login, logout, user, connectWallet, linkWallet } = usePrivy();
-  const { wallets, activeWallet } = useSolanaWallets() as any;
+  const { authenticated, ready, login, logout: privyLogout, user, connectWallet: privyConnectWallet, linkWallet } = usePrivy();
+  const { wallets, activeWallet, disconnectWallet } = useSolanaWallets() as any;
   const { sendTransaction } = useSendTransaction();
 
   const privyWallet = useMemo(() => {
@@ -30,28 +27,27 @@ export function usePrivyWallet() {
   }, [activeWallet, wallets]);
 
   const publicKey = useMemo(() => {
-    if (!privyWallet) {
+    if (!authenticated || !privyWallet) {
       return null;
     }
     const address = privyWallet.publicKey?.toBase58?.() || privyWallet.address;
     return address ? new PublicKey(address) : null;
-  }, [privyWallet]);
+  }, [privyWallet, authenticated]);
 
   const connected = useMemo(() => {
-    // Ensure all values are truthy (not undefined/null/false)
     return (
       authenticated === true && ready === true && !!privyWallet && !!publicKey
     );
   }, [authenticated, ready, privyWallet, publicKey]);
 
-  const signMessage = async (message: Uint8Array): Promise<Uint8Array> => {
+  const signMessage = useCallback(async (message: Uint8Array): Promise<Uint8Array> => {
     if (!privyWallet) {
       throw new Error('Wallet not connected');
     }
     return signMessageWithPrivy(privyWallet, message);
-  };
+  }, [privyWallet]);
 
-  const signTransaction = async (transaction: any): Promise<any> => {
+  const signTransaction = useCallback(async (transaction: any): Promise<any> => {
     if (!privyWallet) {
       throw new Error('Wallet not connected');
     }
@@ -61,15 +57,7 @@ export function usePrivyWallet() {
     }
 
     return privyWallet.signTransaction(transaction);
-  };
-
-  const disconnect = async () => {
-    await logout();
-  };
-
-  const connect = async () => {
-    await login();
-  };
+  }, [privyWallet]);
 
   const sendTransactionWithAddress = useCallback<typeof sendTransaction>(
     async (input) => {
@@ -87,22 +75,34 @@ export function usePrivyWallet() {
     [privyWallet, sendTransaction]
   );
 
+  const logout = useCallback(async () => {
+    if (activeWallet && typeof disconnectWallet === 'function') {
+      try {
+        await disconnectWallet(activeWallet);
+      } catch (e) {
+        console.warn('Failed to disconnect external wallet:', e);
+      }
+    }
+
+    await privyLogout();
+  }, [activeWallet, disconnectWallet, privyLogout]);
+
   return {
     publicKey,
     connected,
     ready,
     authenticated,
-    signMessage,
-    signTransaction,
-    disconnect,
-    connect,
-    login,
-    logout,
-    sendTransaction: sendTransactionWithAddress,
+    user,
     wallet: privyWallet,
     wallets,
-    user,
-    connectWallet,
+
+    login,
+    logout,
+    connectWallet: privyConnectWallet,
     linkWallet,
+
+    signMessage,
+    signTransaction,
+    sendTransaction: sendTransactionWithAddress,
   };
 }

@@ -2,6 +2,7 @@
 
 import { useLogin } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useCallback, useState } from 'react';
 
 import { useToast } from '@/hooks/use-toast';
 import api from '@/libs/api';
@@ -13,6 +14,7 @@ import {
 export const usePrivyLogin = () => {
   const { toast } = useToast();
   const { wallets } = useSolanaWallets();
+  const [isThrottled, setIsThrottled] = useState(false);
 
   const getReferralCode = (): string | undefined => {
     if (typeof window === 'undefined') {
@@ -22,7 +24,7 @@ export const usePrivyLogin = () => {
     return urlParams.get('referral') || undefined;
   };
 
-  const { login } = useLogin({
+  const { login: privyLogin } = useLogin({
     onComplete: async () => {
       const privyWallet = getPrivySolanaWallet(wallets);
       const address = privyWallet?.address || privyWallet?.publicKey?.toBase58?.();
@@ -76,7 +78,9 @@ export const usePrivyLogin = () => {
       || errorMessage.includes('user denied')
       || errorMessage.includes('cancelled')
       || errorMessage.includes('canceled')
-      || errorMessage.includes('wallet address duplicate');
+      || errorMessage.includes('wallet address duplicate')
+      || errorMessage.includes('already connecting')
+      || errorMessage.includes('duplicate attempt');
 
     if (isUserCancellation) {
       return;
@@ -88,6 +92,17 @@ export const usePrivyLogin = () => {
       variant: 'danger',
     });
   };
+
+  const login = useCallback(() => {
+    if (isThrottled) {
+      return;
+    }
+
+    setIsThrottled(true);
+    setTimeout(() => setIsThrottled(false), 2000);
+
+    privyLogin();
+  }, [isThrottled, privyLogin]);
 
   return {
     login,

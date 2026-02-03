@@ -16,13 +16,13 @@ import { usePrivyWallet } from '@/hooks/use-privy-wallet';
 import { storageKey } from '@/config/query';
 import { maskWalletAddress } from '@/utils/wallet';
 import { cn } from '@/utils/cn';
-import { 
-  CloseIcon, 
-  HomeIcon, 
-  InfoIcon, 
-  QuestIcon, 
-  TrophyIcon, 
-  BoardsIcon, 
+import {
+  CloseIcon,
+  HomeIcon,
+  InfoIcon,
+  QuestIcon,
+  TrophyIcon,
+  BoardsIcon,
   DaoIcon,
   CopyIcon,
   ProfileIcon,
@@ -48,7 +48,7 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
   const segment = useSelectedLayoutSegment();
   const { ready } = usePrivy();
   const { login } = usePrivyLogin();
-  const { user, address: sessionAddress, setAddress, isLoggingOutRef } = useAuth();
+  const { user, address: sessionAddress, isLoggingOutRef } = useAuth();
   const isAdmin = user?.role?.toUpperCase() === 'ADMIN';
   const isLoggedIn = !!sessionAddress;
   const router = useRouter();
@@ -65,7 +65,7 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
         className="fixed inset-0 bg-black/50 z-40 lg:hidden animate-in fade-in duration-300"
         onClick={onClose}
       />
-      
+
       <div className="fixed top-0 right-0 h-full w-[280px] bg-background z-50 shadow-xl lg:hidden animate-in slide-in-from-right duration-300">
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-border">
@@ -83,11 +83,11 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
             <div className="space-y-4">
               <nav className="space-y-1 pb-4 border-b border-border">
                 {navLinks.map((link) => {
-                  const isActive = link.segment === null 
-                    ? !segment 
+                  const isActive = link.segment === null
+                    ? !segment
                     : segment === link.segment;
                   const Icon = link.Icon;
-                  
+
                   return (
                     <Link
                       key={link.href}
@@ -95,8 +95,8 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
                       onClick={onClose}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 rounded-lg font-outfit text-sm font-medium transition-colors",
-                        isActive 
-                          ? "bg-custom-blue-500/10 text-custom-blue-500" 
+                        isActive
+                          ? "bg-custom-blue-500/10 text-custom-blue-500"
                           : "text-foreground hover:bg-gray-100 dark:hover:bg-white/10"
                       )}
                     >
@@ -112,10 +112,10 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200">
-                        <Image 
-                          src="/assets/images/avatar.png" 
-                          alt="Avatar" 
-                          width={40} 
+                        <Image
+                          src="/assets/images/avatar.png"
+                          alt="Avatar"
+                          width={40}
                           height={40}
                           className="object-cover"
                         />
@@ -151,13 +151,11 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
                         if (isLoggingOutRef) {
                           isLoggingOutRef.current = true;
                         }
-                        
+
                         onClose();
-                        
+
                         try {
-                          setAddress(null);
                           if (typeof window !== 'undefined') {
-                            window.localStorage.removeItem('bpl-selected-wallet');
                             window.sessionStorage.removeItem(storageKey.signedMessage);
                             window.sessionStorage.removeItem('__creating_signature__');
                           }
