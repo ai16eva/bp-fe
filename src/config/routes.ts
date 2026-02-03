@@ -9,5 +9,6 @@ export const ROUTES = {
   DAO: '/dao',
   ADMIN_PLAY_GAME: '/admin',
   ADMIN_GRANTS: '/admin/grant-admin',
+  ADMIN_MINT_NFT: '/admin/mint-nft',
   PROFILE: '/profile',
 };

@@ -41,6 +41,13 @@ export default function AdminLayout({
               Grants Admin
             </TabButton>
           </Link>
+
+          <Link href={ROUTES.ADMIN_MINT_NFT}>
+            <TabButton active={segment === 'mint-nft'}>
+              <ReceiptTextIcon />
+              Mint NFT
+            </TabButton>
+          </Link>
         </div>
         {children}
       </div>
