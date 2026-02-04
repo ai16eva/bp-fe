@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { usePrivy } from '@privy-io/react-auth';
 import { usePrivyWallet } from '@/hooks/use-privy-wallet';
-import { useGovernanceSDK } from '@/hooks/use-solana-contract';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { PublicKey } from '@solana/web3.js';
 import { Loader2 } from 'lucide-react';
 import { Typography } from '@/components/ui/typography';
 
@@ -24,7 +23,7 @@ const formSchema = z.object({
 export function MintGovernanceNftForm() {
     const { toast } = useToast();
     const { connected, sendTransaction, publicKey } = usePrivyWallet();
-    const governance = useGovernanceSDK();
+    const { getAccessToken } = usePrivy();
     const [isLoading, setIsLoading] = useState(false);
     const [currentMintIndex, setCurrentMintIndex] = useState(0);
 
@@ -39,7 +38,7 @@ export function MintGovernanceNftForm() {
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        if (!connected || !publicKey || !governance || !sendTransaction) {
+        if (!connected || !publicKey || !sendTransaction) {
             toast({
                 title: "Wallet not connected",
                 description: "Please connect your wallet first.",
@@ -90,64 +89,36 @@ export function MintGovernanceNftForm() {
             const { uri } = await uploadRes.json();
             console.log('Metadata URI:', uri);
 
-            const receiverPubkey = new PublicKey(values.walletAddress);
-
             const quantity = values.quantity || 1;
 
-            for (let i = 0; i < quantity; i++) {
-                setCurrentMintIndex(i + 1);
+            const accessToken = await getAccessToken();
 
-                const { transaction, nftMint } = await governance.mintGovernanceNft(
-                    values.name,
-                    values.symbol,
-                    uri,
-                    receiverPubkey,
-                    publicKey
-                );
+            const mintRes = await fetch('/api/nfts/admin/mint', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    walletAddress: values.walletAddress,
+                    metadataUri: uri,
+                    quantity: quantity,
+                    name: values.name,
+                    symbol: values.symbol
+                })
+            });
 
-                const connection = governance.program.provider.connection;
-                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
-
-                transaction.recentBlockhash = blockhash;
-                transaction.feePayer = publicKey;
-
-                transaction.partialSign(nftMint);
-
-                const receipt = await sendTransaction({
-                    transaction,
-                    connection
-                });
-
-                await connection.confirmTransaction({
-                    signature: receipt.signature,
-                    blockhash,
-                    lastValidBlockHeight
-                }, 'confirmed');
-
-                toast({
-                    title: `Minted ${i + 1}/${quantity}`,
-                    description: `Minted NFT ${nftMint.publicKey.toBase58()} successfully.`,
-                });
+            if (!mintRes.ok) {
+                const err = await mintRes.json();
+                throw new Error(err.message || 'Failed to mint on server');
             }
 
-            // 3. Trigger Backend Reindex
-            try {
-                const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-                await fetch(`${apiBaseUrl}/api/nft/admin/reindex`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ collection: null }) // null defaults to governance collection
-                });
-                console.log('Backend reindex triggered successfully');
-            } catch (reindexError) {
-                console.error('Failed to trigger backend reindex:', reindexError);
-            }
+            const mintData = await mintRes.json();
+            console.log('Mint Result:', mintData);
 
             toast({
-                title: "All Mints Successful!",
-                description: `Minted ${quantity} NFTs for ${values.walletAddress}. Database is being updated.`,
+                title: "Mint Request Successful!",
+                description: `Successfully requested mint of ${mintData.data.successCount} NFTs.`,
             });
 
             form.reset();
