@@ -54,22 +54,9 @@ export default function QuestCard({
             />
           </div>
 
-          <h3 className="font-outfit line-clamp-2 flex-1 text-xl font-semibold leading-[120%] text-black dark:text-white">
+          <h3 className="font-outfit line-clamp-2 flex-1 text-lg font-semibold leading-[120%] text-black dark:text-white">
             {name}
           </h3>
-
-          <div
-            className={cn(
-              'flex flex-shrink-0 items-center justify-center rounded-[10px] px-3 py-1',
-              status === 'in-progress'
-                ? 'bg-[rgba(40,175,61,0.1)] text-[#008714] dark:bg-[rgba(0,194,29,0.1)] dark:text-[#00C21D]'
-                : 'bg-[rgba(220,38,38,0.1)] text-[#DC2626]'
-            )}
-          >
-            <span className="font-outfit text-sm font-normal leading-[18px]">
-              {status === 'in-progress' ? 'In Progress' : 'Closed'}
-            </span>
-          </div>
         </div>
 
         {/* Options section with fixed min-height for consistent card heights */}
@@ -108,10 +95,25 @@ export default function QuestCard({
         </div>
 
         <div className="mt-auto flex items-center justify-between p-4">
-          <div className="flex items-center justify-center rounded-lg bg-[rgba(0,111,188,0.08)] px-3 py-1 dark:bg-[rgba(255,255,255,0.1)]">
-            <span className="font-outfit text-sm font-normal leading-[18px] text-[#006FBC] dark:text-white">
-              {symbol}
-            </span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center rounded-lg bg-[rgba(0,111,188,0.08)] px-3 py-1 dark:bg-[rgba(255,255,255,0.1)]">
+              <span className="font-outfit text-sm font-normal leading-[18px] text-[#006FBC] dark:text-white">
+                {symbol}
+              </span>
+            </div>
+
+            <div
+              className={cn(
+                'flex flex-shrink-0 items-center justify-center rounded-[10px] px-3 py-1',
+                status === 'in-progress'
+                  ? 'bg-[rgba(40,175,61,0.1)] text-[#008714] dark:bg-[rgba(0,194,29,0.1)] dark:text-[#00C21D]'
+                  : 'bg-[rgba(220,38,38,0.1)] text-[#DC2626]'
+              )}
+            >
+              <span className="font-outfit text-sm font-normal leading-[18px]">
+                {status === 'in-progress' ? 'In Progress' : 'Closed'}
+              </span>
+            </div>
           </div>
 
           <span className="font-outfit text-sm font-normal leading-[18px] text-[#353535] dark:text-[#E4E4E4]">
