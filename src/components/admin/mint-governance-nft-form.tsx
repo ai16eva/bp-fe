@@ -18,6 +18,7 @@ const formSchema = z.object({
     walletAddress: z.string().min(32, 'Invalid wallet address'),
     name: z.string().min(1, 'Name is required'),
     symbol: z.string().min(1, 'Symbol is required'),
+    quantity: z.number().min(1, 'Quantity must be at least 1').default(1),
 });
 
 export function MintGovernanceNftForm() {
@@ -25,6 +26,7 @@ export function MintGovernanceNftForm() {
     const { connected, sendTransaction, publicKey } = usePrivyWallet();
     const governance = useGovernanceSDK();
     const [isLoading, setIsLoading] = useState(false);
+    const [currentMintIndex, setCurrentMintIndex] = useState(0);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -32,6 +34,7 @@ export function MintGovernanceNftForm() {
             walletAddress: '',
             name: 'Boomplay Governance NFT',
             symbol: 'BGOV',
+            quantity: 1,
         },
     });
 
@@ -46,6 +49,7 @@ export function MintGovernanceNftForm() {
         }
 
         setIsLoading(true);
+        setCurrentMintIndex(0);
         try {
             const formData = new FormData();
 
@@ -88,33 +92,43 @@ export function MintGovernanceNftForm() {
 
             const receiverPubkey = new PublicKey(values.walletAddress);
 
+            const quantity = values.quantity || 1;
 
-            const { transaction, nftMint } = await governance.mintGovernanceNft(
-                values.name,
-                values.symbol,
-                uri,
-                receiverPubkey,
-                publicKey
-            );
+            for (let i = 0; i < quantity; i++) {
+                setCurrentMintIndex(i + 1);
 
-            const connection = governance.program.provider.connection;
-            const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
+                const { transaction, nftMint } = await governance.mintGovernanceNft(
+                    values.name,
+                    values.symbol,
+                    uri,
+                    receiverPubkey,
+                    publicKey
+                );
 
-            transaction.recentBlockhash = blockhash;
-            transaction.feePayer = publicKey;
+                const connection = governance.program.provider.connection;
+                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
 
-            transaction.partialSign(nftMint);
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = publicKey;
 
-            const receipt = await sendTransaction({
-                transaction,
-                connection
-            });
+                transaction.partialSign(nftMint);
 
-            await connection.confirmTransaction({
-                signature: receipt.signature,
-                blockhash,
-                lastValidBlockHeight
-            }, 'confirmed');
+                const receipt = await sendTransaction({
+                    transaction,
+                    connection
+                });
+
+                await connection.confirmTransaction({
+                    signature: receipt.signature,
+                    blockhash,
+                    lastValidBlockHeight
+                }, 'confirmed');
+
+                toast({
+                    title: `Minted ${i + 1}/${quantity}`,
+                    description: `Minted NFT ${nftMint.publicKey.toBase58()} successfully.`,
+                });
+            }
 
             // 3. Trigger Backend Reindex
             try {
@@ -123,20 +137,17 @@ export function MintGovernanceNftForm() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Note: If you have admin authentication tokens, they should be added here.
-                        // For now, assuming the API is protected or internal for testing.
                     },
                     body: JSON.stringify({ collection: null }) // null defaults to governance collection
                 });
                 console.log('Backend reindex triggered successfully');
             } catch (reindexError) {
                 console.error('Failed to trigger backend reindex:', reindexError);
-                // We don't throw here to avoid showing an error to the user if mint was successful but reindex failed
             }
 
             toast({
-                title: "Mint Successful!",
-                description: `Minted NFT ${nftMint.publicKey.toBase58()} for ${values.walletAddress}. Database is being updated.`,
+                title: "All Mints Successful!",
+                description: `Minted ${quantity} NFTs for ${values.walletAddress}. Database is being updated.`,
             });
 
             form.reset();
@@ -150,6 +161,7 @@ export function MintGovernanceNftForm() {
             });
         } finally {
             setIsLoading(false);
+            setCurrentMintIndex(0);
         }
     }
 
@@ -172,7 +184,7 @@ export function MintGovernanceNftForm() {
                         )}
                     />
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <FormField
                             control={form.control}
                             name="name"
@@ -199,6 +211,25 @@ export function MintGovernanceNftForm() {
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={form.control}
+                            name="quantity"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Quantity</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            min={1}
+                                            placeholder="1"
+                                            {...field}
+                                            onChange={(e) => field.onChange(parseInt(e.target.value))}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -219,7 +250,7 @@ export function MintGovernanceNftForm() {
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Minting...
+                                {currentMintIndex > 0 ? `Minting ${currentMintIndex}/${form.getValues('quantity')}...` : 'Preparing...'}
                             </>
                         ) : (
                             'Mint NFT'
