@@ -93,7 +93,9 @@ export function MintGovernanceNftForm() {
 
             const accessToken = await getAccessToken();
 
-            const mintRes = await fetch('/api/nfts/admin/mint', {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+
+            const mintRes = await fetch(`${apiBaseUrl}/nfts/admin/mint`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
