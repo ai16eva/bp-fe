@@ -18,7 +18,7 @@ const formSchema = z.object({
     walletAddress: z.string().min(32, 'Invalid wallet address'),
     name: z.string().min(1, 'Name is required'),
     symbol: z.string().min(1, 'Symbol is required'),
-    quantity: z.number().min(1, 'Quantity must be at least 1').default(1),
+    quantity: z.number().min(1, 'Quantity must be at least 1').default(5),
 });
 
 export function MintGovernanceNftForm() {
@@ -34,7 +34,7 @@ export function MintGovernanceNftForm() {
             walletAddress: '',
             name: 'Boomplay Governance NFT',
             symbol: 'BGOV',
-            quantity: 1,
+            quantity: 5,
         },
     });
 
