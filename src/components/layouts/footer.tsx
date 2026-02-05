@@ -29,7 +29,7 @@ export const Footer = () => {
             </h5>
             <div className="flex items-center gap-1">
               <a
-                href="https://x.com/boomplayglobal"
+                href="https://x.com/1boomplay"
                 rel="noopener noreferrer"
                 target="_blank"
                 className="flex size-8 items-center justify-center"
@@ -43,7 +43,7 @@ export const Footer = () => {
                 />
               </a>
               <a
-                href="https://t.me/boomplayglobal"
+                href="https://t.me/UNILAPSEGlobal"
                 rel="noopener noreferrer"
                 target="_blank"
                 className="flex size-8 items-center justify-center"
@@ -59,17 +59,17 @@ export const Footer = () => {
             </div>
           </div>
         </div>
-      <div className="flex flex-wrap items-center gap-0.5 max-md:justify-center">
-        <span className="font-poppins text-xs font-normal leading-[18px] text-[#1F1F1F] dark:font-light dark:text-[#767676]">
-          Copyright ©
-        </span>
-        <span className="font-poppins text-xs font-semibold uppercase leading-[18px] text-[#1F1F1F] dark:text-white">
-          BOOM Company
-        </span>
-        <span className="font-poppins text-xs font-normal leading-[18px] text-[#1F1F1F] dark:font-light dark:text-[#767676]">
-          Co., LTD. All Rights Reserved.
-        </span>
-      </div>
+        <div className="flex flex-wrap items-center gap-0.5 max-md:justify-center">
+          <span className="font-poppins text-xs font-normal leading-[18px] text-[#1F1F1F] dark:font-light dark:text-[#767676]">
+            Copyright ©
+          </span>
+          <span className="font-poppins text-xs font-semibold uppercase leading-[18px] text-[#1F1F1F] dark:text-white">
+            BOOM Company
+          </span>
+          <span className="font-poppins text-xs font-normal leading-[18px] text-[#1F1F1F] dark:font-light dark:text-[#767676]">
+            Co., LTD. All Rights Reserved.
+          </span>
+        </div>
       </div>
 
     </footer >
