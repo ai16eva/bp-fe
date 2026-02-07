@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import type { RowSelectionState, Table } from '@tanstack/react-table';
-import { now, parseToKST } from '@/utils/timezone';
 import { useMemo } from 'react';
 
 import { appQueryKeys } from '@/config/query';
@@ -30,6 +29,7 @@ import type {
   AdminQuestStatus,
   BaseAdminQuest,
 } from '@/types/schema';
+import { now, parseToKST } from '@/utils/timezone';
 
 import { Button } from '../ui/button';
 
@@ -198,8 +198,6 @@ export const TableActions = ({
 
     const hasEnoughVote = quest && quest.total_vote >= 5;
 
-
-
     const isRejected = !!quest && quest.total_reject_power > quest.total_approve_power;
 
     const canSetDraftEnd
@@ -213,7 +211,7 @@ export const TableActions = ({
 
     const canForceDraft
       = !!quest && quest.total_approve_power === quest.total_reject_power;
-    const canForceDraftEndNow = !!quest && quest.total_vote >= 5;
+    const canForceDraftEndNow = !!quest && quest.total_vote >= 5 && quest.quest_status === 'DRAFT';
 
     view = (
       <>
