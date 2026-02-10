@@ -1,7 +1,8 @@
 'use client';
 
 import type { CellContext, ColumnDef } from '@tanstack/react-table';
-import { useMemo } from 'react';
+import { parseAsInteger, useQueryState } from 'nuqs';
+import React, { useMemo } from 'react';
 
 import { CustomCheckbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/ui/data-table';
@@ -19,6 +20,7 @@ import { formatNumber } from '@/utils/number';
 
 import type { ClaimButtonProps } from './claim-button';
 import { ClaimButton } from './claim-button';
+import { PaginationContainer } from '../ui/pagination';
 
 const questStatuses = [
   { name: 'Draft', value: 'draft' },
@@ -261,7 +263,17 @@ function calculatePotentialReward(betting: MemberBetting) {
 
 export const GamesTable = () => {
   const { publicKey } = usePrivyWallet();
-  const { data, isLoading } = useGetMemberBettings(publicKey?.toBase58() ?? '');
+  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+  const PAGE_SIZE = 50;
+
+  const { data, isLoading } = useGetMemberBettings(
+    publicKey?.toBase58() ?? '',
+    page,
+    PAGE_SIZE
+  );
+
+  const total = data?.data?.total ?? 0;
+  const pageCount = Math.max(Math.ceil(total / PAGE_SIZE), 1);
 
   const columns = useMemo(() => {
     const cols = getColumns();
@@ -280,19 +292,36 @@ export const GamesTable = () => {
         ? Array.from({ length: 10 }).map((_, idx) => ({
           betting_key: Date.now() + idx,
         }))
-        : data?.data ?? []) as MemberBetting[],
+        : data?.data?.bettings ?? []) as MemberBetting[],
     [isLoading, data],
   );
 
   const { table } = useDataTable({
     data: quests,
     columns,
-    pageCount: -1,
+    pageCount,
     initialState: {
       sorting: [{ id: 'betting_created_at', desc: true }],
     },
     getRowId: (originalRow: MemberBetting) => `${originalRow.betting_key}`,
   });
 
-  return <DataTable table={table} />;
+  return (
+    <div className="space-y-4">
+      <div className="flex h-12 items-center justify-between gap-4">
+        <p className="font-outfit text-base font-normal text-[#062B3E] dark:text-white">
+          Total: {total} items
+        </p>
+      </div>
+      <DataTable table={table} />
+      {total > 0 && (
+        <PaginationContainer
+          className="my-12"
+          currentPage={page}
+          totalPages={pageCount}
+          onPageChange={p => setPage(p)}
+        />
+      )}
+    </div>
+  );
 };

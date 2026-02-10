@@ -29,17 +29,17 @@ export const useGetMember = (wallet?: string) => {
   });
 };
 
-export const useGetMemberVotings = (wallet: string) => {
+export const useGetMemberVotings = (wallet: string, page = 1, size = 200) => {
   return useQuery({
-    queryKey: [...appQueryKeys.member.votings, wallet].filter(Boolean),
-    queryFn: () => api.getMemberVotings({ wallet }),
+    queryKey: [...appQueryKeys.member.votings, wallet, page, size].filter(Boolean),
+    queryFn: () => api.getMemberVotings({ wallet, page, size }),
   });
 };
 
-export const useGetMemberBettings = (wallet: string) => {
+export const useGetMemberBettings = (wallet: string, page = 1, size = 50) => {
   return useQuery({
-    queryKey: [...appQueryKeys.member.bettings, wallet].filter(Boolean),
-    queryFn: () => api.getMemberBettings({ wallet }),
+    queryKey: [...appQueryKeys.member.bettings, wallet, page, size].filter(Boolean),
+    queryFn: () => api.getMemberBettings({ wallet, page, size }),
   });
 };
 

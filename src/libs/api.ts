@@ -278,7 +278,7 @@ class Api {
 
   public getMemberBettings(request: GetMemberBettingsRequest) {
     const { wallet, ...rest } = request;
-    return fetcher<BaseResponse<MemberBetting[]>>(
+    return fetcher<BaseResponse<{ total: number; bettings: MemberBetting[] }>>(
       `${API_BASE_URL}/member/${wallet}/bettings?${qs.stringify(rest)}`,
       {
         headers: this.headers,

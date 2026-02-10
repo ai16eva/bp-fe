@@ -4,6 +4,7 @@ import type { CellContext, ColumnDef } from '@tanstack/react-table';
 import dayjs from 'dayjs';
 import { CheckIcon } from 'lucide-react';
 import { useMemo } from 'react';
+import { parseAsInteger, useQueryState } from 'nuqs';
 
 import { DataTable } from '@/components/ui/data-table';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
@@ -15,6 +16,7 @@ import { Env } from '@/libs/Env';
 import type { MemberBetting } from '@/types/schema';
 import { formatNumber } from '@/utils/number';
 import { maskWalletAddress } from '@/utils/wallet';
+import { PaginationContainer } from '../ui/pagination';
 
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
@@ -151,7 +153,12 @@ const RecipientAddressCell = ({ row }: CellContext<MemberBetting, unknown>) => {
 export const HistoryTable = () => {
   const { publicKey } = usePrivyWallet();
   const address = publicKey?.toBase58();
-  const { data, isLoading } = useGetMemberBettings(address!);
+  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+  const PAGE_SIZE = 50;
+  const { data, isLoading } = useGetMemberBettings(address!, page, PAGE_SIZE);
+
+  const total = data?.data?.total ?? 0;
+  const pageCount = Math.max(Math.ceil(total / PAGE_SIZE), 1);
 
   const columns = useMemo(() => {
     const cols = getColumns();
@@ -170,7 +177,7 @@ export const HistoryTable = () => {
         ? Array.from({ length: 10 }).map((_, idx) => ({
           betting_key: String(Date.now() + idx),
         }))
-        : (data?.data ?? []).filter(
+        : (data?.data?.bettings ?? []).filter(
           (item: MemberBetting) =>
             item.quest.quest_status === 'MARKET_SUCCESS',
         ),
@@ -180,13 +187,30 @@ export const HistoryTable = () => {
   const { table } = useDataTable({
     data: quests,
     columns,
-    pageCount: -1,
+    pageCount,
     initialState: {
       sorting: [{ id: 'betting_created_at', desc: true }],
     },
     getRowId: (originalRow: MemberBetting) => `${originalRow.betting_key}`,
   });
 
-  return <DataTable table={table} />;
+  return (
+    <div className="space-y-4">
+      <div className="flex h-12 items-center justify-between gap-4">
+        <p className="font-outfit text-base font-normal text-[#062B3E] dark:text-white">
+          Total: {total} items
+        </p>
+      </div>
+      <DataTable table={table} />
+      {total > 0 && (
+        <PaginationContainer
+          className="my-12"
+          currentPage={page}
+          totalPages={pageCount}
+          onPageChange={p => setPage(p)}
+        />
+      )}
+    </div>
+  );
 };
 

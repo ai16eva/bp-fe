@@ -1,6 +1,7 @@
 'use client';
 
 import type { CellContext, ColumnDef } from '@tanstack/react-table';
+import { parseAsInteger, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
 
 import { DataTable } from '@/components/ui/data-table';
@@ -16,6 +17,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 import type { ClaimButtonProps } from './claim-button';
 import { ClaimButton } from './claim-button';
+import { PaginationContainer } from '../ui/pagination';
 import { StatusFlow } from './status-flow';
 
 function getColumns({
@@ -95,17 +97,22 @@ function getColumns({
 
 export const VotingTable = () => {
   const { publicKey } = usePrivyWallet();
-  const { data, isLoading } = useGetMemberVotings(publicKey?.toBase58() ?? '');
+  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+  const PAGE_SIZE = 50;
+  const { data, isLoading } = useGetMemberVotings(publicKey?.toBase58() ?? '', page, PAGE_SIZE);
   const { symbol, reward } = useGetGovernanceConfig();
+
+  const total = data?.data?.total ?? 0;
+  const pageCount = Math.max(Math.ceil(total / PAGE_SIZE), 1);
 
   const columns = useMemo(() => {
     const cols = getColumns({ votingToken: symbol, reward });
 
     return isLoading
       ? cols.map(column => ({
-          ...column,
-          cell: () => <Skeleton className="h-4 w-16" />,
-        }))
+        ...column,
+        cell: () => <Skeleton className="h-4 w-16" />,
+      }))
       : cols;
   }, [isLoading, symbol, reward]);
 
@@ -113,8 +120,8 @@ export const VotingTable = () => {
     () =>
       (isLoading
         ? Array.from({ length: 10 }).map((_, idx) => ({
-            betting_key: Date.now() + idx,
-          }))
+          betting_key: Date.now() + idx,
+        }))
         : data?.data?.votes ?? []) as MemberVoting[],
     [isLoading, data],
   );
@@ -122,12 +129,29 @@ export const VotingTable = () => {
   const { table } = useDataTable({
     data: quests,
     columns,
-    pageCount: -1,
+    pageCount,
     initialState: {},
     getRowId: (originalRow: MemberVoting) => originalRow.quest_key,
   });
 
-  return <DataTable table={table} />;
+  return (
+    <div className="space-y-4">
+      <div className="flex h-12 items-center justify-between gap-4">
+        <p className="font-outfit text-base font-normal text-[#062B3E] dark:text-white">
+          Total: {total} items
+        </p>
+      </div>
+      <DataTable table={table} />
+      {total > 0 && (
+        <PaginationContainer
+          className="my-12"
+          currentPage={page}
+          totalPages={pageCount}
+          onPageChange={p => setPage(p)}
+        />
+      )}
+    </div>
+  );
 };
 
 const ClaimRewardCell = ({ row }: CellContext<MemberVoting, unknown>) => {
