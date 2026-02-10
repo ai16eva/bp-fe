@@ -50,8 +50,8 @@ export function useSolanaWallet(): SolanaWalletApi & {
     () => ({
       publicKey: publicKey ?? undefined,
       connected,
-      signTransaction: undefined, // Privy uses sendTransaction instead
-      signAllTransactions: undefined, // Not available with Privy
+      signTransaction: undefined,
+      signAllTransactions: undefined,
       signMessage,
       connection,
       ready,

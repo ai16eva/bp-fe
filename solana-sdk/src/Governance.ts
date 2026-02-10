@@ -1133,14 +1133,20 @@ export class GovernanceSDK {
     const [governancePDA] = this.getGovernancePDA();
     const [voterCheckpointsPDA] = this.getVoterCheckpointsPDA(voter);
 
-    const remainingAccounts: Array<{
+    const tokenAccounts: Array<{
+      pubkey: PublicKey;
+      isWritable: boolean;
+      isSigner: boolean;
+    }> = [];
+
+    const metadataAccounts: Array<{
       pubkey: PublicKey;
       isWritable: boolean;
       isSigner: boolean;
     }> = [];
 
     for (const tokenAccount of nftTokenAccounts) {
-      remainingAccounts.push({
+      tokenAccounts.push({
         pubkey: tokenAccount,
         isWritable: false,
         isSigner: false,
@@ -1172,7 +1178,7 @@ export class GovernanceSDK {
         const nftMint = tokenAccountData.mint;
         const [metadataPDA] = this.getMetadataAccountPDA(nftMint);
 
-        remainingAccounts.push({
+        metadataAccounts.push({
           pubkey: metadataPDA,
           isWritable: false,
           isSigner: false,
@@ -1184,6 +1190,8 @@ export class GovernanceSDK {
         );
       }
     }
+
+    const remainingAccounts = [...tokenAccounts, ...metadataAccounts];
 
     const instruction = await this.program.methods
       .updateVoterCheckpoint()
@@ -1222,6 +1230,8 @@ export class GovernanceSDK {
     const [answerOptionPDA] = this.getAnswerOptionPDA(questKey, answerKey);
     const [answerVoterPDA] = this.getAnswerVoterPDA(questKey, voter);
 
+    const [voterCheckpointsPDA] = this.getVoterCheckpointsPDA(voter);
+
     const instruction = await this.program.methods
       .voteAnswer(questKey, answerKey)
       .accountsPartial({
@@ -1232,6 +1242,7 @@ export class GovernanceSDK {
         answerVote: answerVotePDA,
         answerOption: answerOptionPDA,
         answerVoterRecord: answerVoterPDA,
+        voterCheckpoints: voterCheckpointsPDA,
         systemProgram: SystemProgram.programId,
       })
       .instruction();

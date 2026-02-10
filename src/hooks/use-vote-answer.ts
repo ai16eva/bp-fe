@@ -1,5 +1,5 @@
 import { BN } from '@coral-xyz/anchor';
-import { Transaction } from '@solana/web3.js';
+import { Transaction, PublicKey } from '@solana/web3.js';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { appQueryKeys } from '@/config/query';
@@ -19,7 +19,8 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { publicKey, sendTransaction } = usePrivyWallet();
-  const { voteAnswer } = useGovernanceOperations();
+  const { voteAnswer, fetchVoterCheckpoints, updateVoterCheckpoint } =
+    useGovernanceOperations();
   const { nfts, refetch } = useNFTBalance();
 
   const txService = useMemo(() => new SolanaTransactionService(connection), []);
@@ -59,19 +60,30 @@ export function useVoteAnswer(quest: DAOQuestAnswer) {
       const questKeyBN = new BN(quest_key);
       const answerKeyBN = new BN(answerKey);
 
-      // DISABLED due to On-chain Error: "AccountDidNotSerialize" (3004).
-      /*
+      const combinedTx = new Transaction();
       const nftTokenAccounts = currentNfts.map(
         (nft) => new PublicKey(nft.tokenAccount)
       );
-      const combinedTx = new Transaction();
 
-      const checkpointTx = await updateVoterCheckpoint(nftTokenAccounts);
-      if (checkpointTx) {
-        combinedTx.add(...checkpointTx.instructions);
+
+      // Check on-chain checkpoint
+      const checkpointAccount = await fetchVoterCheckpoints();
+      const onChainCount =
+        checkpointAccount?.checkpoints?.[
+          checkpointAccount.checkpoints.length - 1
+        ]?.nftCount || 0;
+
+      // Update if mismatch
+      if (onChainCount !== currentNfts.length) {
+        console.log(
+          `Checkpoint mismatch: On-chain ${onChainCount} vs Local ${currentNfts.length}. Updating...`
+        );
+        const checkpointTx = await updateVoterCheckpoint(nftTokenAccounts);
+        if (checkpointTx) {
+          combinedTx.add(...checkpointTx.instructions);
+        }
       }
-      */
-      const combinedTx = new Transaction();
+
 
       const voteTx = await voteAnswer(questKeyBN, answerKeyBN);
       if (!voteTx) {

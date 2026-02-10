@@ -1,5 +1,5 @@
 import { BN } from '@coral-xyz/anchor';
-import { Transaction } from '@solana/web3.js';
+import { Transaction, PublicKey } from '@solana/web3.js';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
@@ -20,7 +20,8 @@ export function useVoteSuccess(quest: DAOQuestSuccess) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { publicKey, sendTransaction } = usePrivyWallet();
-  const { voteDecision } = useGovernanceOperations();
+  const { voteDecision, fetchVoterCheckpoints, updateVoterCheckpoint } =
+    useGovernanceOperations();
   const { nfts, refetch } = useNFTBalance();
 
   const txService = useMemo(() => new SolanaTransactionService(connection), []);
@@ -54,20 +55,29 @@ export function useVoteSuccess(quest: DAOQuestSuccess) {
       }
 
       const questKeyBN = new BN(quest_key);
-      // DISABLED due to On-chain Error: "AccountDidNotSerialize" (3004).
-      /*
+
+      const combinedTx = new Transaction();
       const nftTokenAccounts = currentNfts.map(
         (nft) => new PublicKey(nft.tokenAccount)
       );
 
-      const combinedTx = new Transaction();
+      // Check on-chain checkpoint
+      const checkpointAccount = await fetchVoterCheckpoints();
+      const onChainCount =
+        checkpointAccount?.checkpoints?.[
+          checkpointAccount.checkpoints.length - 1
+        ]?.nftCount || 0;
 
-      const checkpointTx = await updateVoterCheckpoint(nftTokenAccounts);
-      if (checkpointTx) {
-        combinedTx.add(...checkpointTx.instructions);
+      // Update if mismatch
+      if (onChainCount !== currentNfts.length) {
+        console.log(
+          `Checkpoint mismatch: On-chain ${onChainCount} vs Local ${currentNfts.length}. Updating...`
+        );
+        const checkpointTx = await updateVoterCheckpoint(nftTokenAccounts);
+        if (checkpointTx) {
+          combinedTx.add(...checkpointTx.instructions);
+        }
       }
-      */
-      const combinedTx = new Transaction();
 
       const voteTx = await voteDecision(questKeyBN, type);
       if (!voteTx) {
